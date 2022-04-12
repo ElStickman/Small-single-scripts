@@ -1,0 +1,24 @@
+<input type="button" class="btn btn-primary" style="float:right;" id="plantillaExcel" name="excel" value="Plantilla Excel" onClick="plantillaExcel();">
+<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script>
+console.log("hola, ¿que tal tu día?");
+function plantillaExcel() {
+	var wb = XLSX.utils.book_new();
+	wb.Props = {
+			Title: "Plantilla excel",
+			Subject: "Subject",
+			Author: "ChangeMe",
+			CreatedDate: new Date()
+	};
+	
+	wb.SheetNames.push("Hoja 1");
+	var ws_data = [["username" , "firstname", "lastname", "idnumber", "email"],
+					["ejemplo@fake.cl", "Replace", "Me", "Rut", "Email@Personal.fake"]];
+	var ws = XLSX.utils.aoa_to_sheet(ws_data);
+	wb.Sheets["Hoja 1"] = ws;
+
+	var wbout = XLSX.write(wb, {bookType:"xlsx",  type: "binary"});
+
+	return XLSX.writeFile(wb, "PlantillaNominas.xlsx");
+};
+</script>
