@@ -1,8 +1,9 @@
-<input type="button" class="btn btn-primary" style="float:right;" id="plantillaExcel" name="excel" value="Plantilla Excel" onClick="plantillaExcel();">
+<!-- Button for the download-->
+<input type="button" class="btn btn-primary" style="float:right;" id="plantillaExcel" name="excel" value="Template Excel" onClick="templateExcel();">
+<!-- Should work with this package. Needs internet conection-->
 <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script>
-console.log("hola, ¿que tal tu día?");
-function plantillaExcel() {
+function templateExcel() {
 	var wb = XLSX.utils.book_new();
 	wb.Props = {
 			Title: "Plantilla excel",
@@ -11,9 +12,10 @@ function plantillaExcel() {
 			CreatedDate: new Date()
 	};
 	
-	wb.SheetNames.push("Hoja 1");
+	wb.SheetNames.push("Sheet 1");
+	//You add your template info here.
 	var ws_data = [["username" , "firstname", "lastname", "idnumber", "email"],
-					["ejemplo@fake.cl", "Replace", "Me", "Rut", "Email@Personal.fake"]];
+					["example@fake.com", "Replace", "Me", "Rut", "Email@Personal.fake"]];
 	var ws = XLSX.utils.aoa_to_sheet(ws_data);
 	wb.Sheets["Hoja 1"] = ws;
 
