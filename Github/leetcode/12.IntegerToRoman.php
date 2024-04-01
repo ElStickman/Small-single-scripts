@@ -28,9 +28,13 @@ class Solution {
                 'I' => 1
     );
         foreach ($dic as $roman => $int) {
-            $total = floor($s / $int);
-            $s   = $s % $int;
-            $finalString .= str_repeat($roman, $total); 
+            //Vemos cuantas veces se puede dividir. (Si es 0, no  imprimirá nada)           
+            if($total = floor($s / $int)) {
+                //Restamos los multiplos de $int
+                $s   = $s % $int;
+                //Agregamos los números romanos equivalentes.
+                $finalString .= str_repeat($roman, $total); 
+            }
         }
     return $finalString;
     }
