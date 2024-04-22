@@ -26,7 +26,7 @@ def generarate_random_string(longitud):
     return random_string
 
 found = False
-
+#Tomar en cuenta que el único motivo del porqué no deje un "parar a los X intentos" es porque demoraba muy poco.
 while (not found):
     #Por qué 3? No hay razón. Si hubiera demorado más, habría usado otra función para aumentar el n°
     randomString = "buda"+generarate_random_string(3)
