@@ -9,7 +9,8 @@
 # in [2]:
 import numpy as np
 from PIL import Image, ImageDraw
-import qrcode
+import vcardparams
+import vcardlib
 
 def generar_numero_aleatorio():
     if np.random.rand() < .66:
@@ -33,40 +34,9 @@ def dibujar_espiral(radio_total, dotmultiplicator, color, radio_qr, messy):
         point_x = int(radio_total + r * np.cos(angle)*numero_aleatorioA)
         point_y = int(radio_total + r * np.sin(angle)*numero_aleatorioB)
         dibujo_fondo.rectangle([point_x, point_y, point_x + dot, point_y + dot], fill=color)
+
 # Información de la vCard
-nombre = "QUIEN TE DIO "
-apellido = "PERMISO DE ESCANEARME"
-nombre_completo = f"{nombre} {apellido}"
-organizacion = "ElStickman codes"
-titulo = "Dueño"
-telefono_trabajo = ""
-telefono_personal = "+569"
-email = "Email@falso.cl"
-direccion = "" #Calle Falsa 123;Springfield;SP;12345;EEUU"
-sitio_web = ""
-fecha_nacimiento = "" #"1995-03-21"
-aniversario = "" #2005-04-02"
-nota = "" #"Información adicional aquí"
-
-vcard_info = f"""
-BEGIN:VCARD
-VERSION:3.0
-N:{apellido};{nombre};;;
-FN:{nombre_completo}
-ORG:{organizacion}
-TITLE:{titulo}
-TEL;TYPE=WORK,VOICE:{telefono_trabajo}
-{f'TEL;TYPE=HOME,VOICE:{telefono_personal}' if telefono_personal else ''}
-EMAIL:{email}
-ADR;TYPE=WORK:{direccion}
-URL:{sitio_web}
-BDAY:{fecha_nacimiento}
-ANNIVERSARY:{aniversario}
-NOTE:{nota}
-END:VCARD
-""".strip()
-
-#print(vcard_info)
+vcard_info = vcardparams.vcard_info
 
 # Parámetros para el diseño
 radio_qr = 350
@@ -78,17 +48,7 @@ radio_total = radio_exterior
 grosor_borde = 2
 color_borde = 'black'
 
-
-# Generación del código QR
-qr = qrcode.QRCode(
-    version=1,
-    error_correction=qrcode.constants.ERROR_CORRECT_H,
-    box_size=radio_qr/32,
-    border=0,
-)
-qr.add_data(vcard_info)
-qr.make(fit=True)
-qr_img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
+qr_img = vcardlib.generar_qr(vcard_info, box_size=radio_qr/32, border=0, filename=False)
 
 # Creación de la imagen de fondo
 img_fondo = Image.new('RGB', (radio_total * 2, radio_total * 2), 'white')
@@ -120,6 +80,7 @@ img_final = Image.new('RGB', (radio_total * 2, radio_total * 2), (255, 255, 255)
 img_final.paste(img_fondo, mask=mask_circular)
 
 # Guardar la imagen
-img_final_path = "VCard.png"
-img_final.save(img_final_path)
+img_final_path = "VCardV1.png"
+img_final.save(f'output/{img_final_path}')
 print(f"Imagen guardada como {img_final_path}")
+
