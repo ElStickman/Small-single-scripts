@@ -3,10 +3,10 @@ import random
 import vcardparams
 import vcardlib
 
-#pip install qrcode[pil] vobject
 background_path = vcardparams.background_path
 logo_path = vcardparams.logo_path
-transparency = 0.6
+transparency = 0.3
+
 # Información de la vCard
 vcard_info = vcardparams.vcard_info
 
@@ -17,9 +17,12 @@ borde = 0
 # Generar el código QR para la vCard
 img_qr = vcardlib.generar_qr(vcard_info.strip(), pixel_size, borde)
 
+# Ajustamos la imagen para que el QR sea 65% del tamaño.
+qr_width, qr_height = img_qr.size
+bg_width = int(qr_width // 0.65)
+bg_height = int(qr_height // 0.65)
+
 # Crear el fondo con puntos aleatorios del mismo tamaño que los píxeles del QR
-bg_width = img_qr.size[0] * (pixel_size // 10)
-bg_height = img_qr.size[1] * (pixel_size // 10)
 bg_img = Image.new('L', (bg_width, bg_height), 255)  # Fondo blanco en escala de grises
 draw = ImageDraw.Draw(bg_img)
 
@@ -68,7 +71,7 @@ path = 'output/VcardV3.png'
 output.save(path)
 
 
-#Generamos mismo QR pero con logo al centro.
+# Generamos mismo QR pero con logo al centro.
 output = vcardlib.insert_logo(output, logo_path, bg_width, bg_height, size=12)
 print("Generando Vcard 3.1")
 output.save('output/VcardV3logo.png')
