@@ -1,15 +1,15 @@
 import vobject
 
 #Fondo de la imagen para el QR
-background_path = 'background/templateimage.png'
+background_path = 'background/profilepic.png'
 logo_path = background_path
 
 # Información de la vCard
-nombre = "Nombre"
-apellido = "Apellido"
+nombre = "ElStickman"
+apellido = "Apellido1 Apellido2"
 nombre_completo = f"{nombre} {apellido}"
 organizacion = "ElStickman codes"
-titulo = "Dueño"
+titulo = "Programador"
 telefono_trabajo = ""
 telefono_personal = "+56912341234"
 email = "Email@falso.cl"
