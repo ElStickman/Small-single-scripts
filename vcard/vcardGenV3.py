@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw
 import random
 import vcardparams
-import vcardlib
+import mainlib
 
 background_path = vcardparams.background_path
 logo_path = vcardparams.logo_path
@@ -15,7 +15,7 @@ pixel_size = 20 # Este es el tamaño del pixel definido en box_size y hacemos el
 
 borde = 0
 # Generar el código QR para la vCard
-img_qr = vcardlib.generar_qr(vcard_info.strip(), pixel_size, borde)
+img_qr = mainlib.generar_qr(vcard_info.strip(), pixel_size, borde)
 
 # Ajustamos la imagen para que el QR sea 65% del tamaño.
 qr_width, qr_height = img_qr.size
@@ -63,15 +63,15 @@ draw_final = ImageDraw.Draw(output)
 draw_final.ellipse((center_x - radius - 10, center_y - radius - 10, center_x + radius + 10, center_y + radius + 10), outline=0, width=20)
 
 # Convertir el fondo blanco a transparente
-output = vcardlib.delete_whites(output)
+output = mainlib.delete_whites(output)
 
-output = vcardlib.render_background(output, background_path, transparency, bg_width, bg_height)
+output = mainlib.render_background(output, background_path, transparency, bg_width, bg_height)
 
 path = 'output/VcardV3.png'
 output.save(path)
 
 
 # Generamos mismo QR pero con logo al centro.
-output = vcardlib.insert_logo(output, logo_path, bg_width, bg_height, size=12)
+output = mainlib.insert_logo(output, logo_path, bg_width, bg_height, size=12)
 print("Generando Vcard 3.1")
 output.save('output/VcardV3logo.png')

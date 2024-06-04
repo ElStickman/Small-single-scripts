@@ -26,10 +26,12 @@ vcard.add('n')
 vcard.n.value = vobject.vcard.Name(family=apellido, given=nombre)
 vcard.add('fn')
 vcard.fn.value = nombre_completo
-vcard.add('org')
-vcard.org.value = [organizacion]
-vcard.add('title')
-vcard.title.value = titulo
+if organizacion:
+    vcard.add('org')
+    vcard.org.value = [organizacion]
+if titulo:
+    vcard.add('title')
+    vcard.title.value = titulo
 if telefono_trabajo:
     tel_work = vcard.add('tel')
     tel_work.type_param = 'WORK,VOICE'
@@ -38,8 +40,9 @@ if telefono_personal:
     tel_home = vcard.add('tel')
     tel_home.type_param = 'HOME,VOICE'
     tel_home.value = telefono_personal
-vcard.add('email')
-vcard.email.value = email
+if email:
+    vcard.add('email')
+    vcard.email.value = email
 if direccion:
     adr = vcard.add('adr')
     adr.type_param = 'WORK'

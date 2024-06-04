@@ -10,7 +10,7 @@
 import numpy as np
 from PIL import Image, ImageDraw
 import vcardparams
-import vcardlib
+import mainlib
 
 def generar_numero_aleatorio():
     if np.random.rand() < .66:
@@ -48,7 +48,7 @@ radio_total = radio_exterior
 grosor_borde = 2
 color_borde = 'black'
 
-qr_img = vcardlib.generar_qr(vcard_info, box_size=radio_qr/32, border=0, filename=False)
+qr_img = mainlib.generar_qr(vcard_info, box_size=radio_qr/32, border=0, filename=False)
 
 # Creación de la imagen de fondo
 img_fondo = Image.new('RGB', (radio_total * 2, radio_total * 2), 'white')
