@@ -155,7 +155,7 @@ def generate_vcardV3(background_path, vcard_info, transparency=0.3):
     #output.save(path)
     return output
 
-def add_text_to_image(img, text, position, font_path="./ttf/arial.ttf", font_size=35):
+def add_text_to_image(img, text, position, font_path="./ttf/arial.ttf", font_size=35, fill="black"):
     # Create a drawing context
     draw = ImageDraw.Draw(img)
 
@@ -169,7 +169,7 @@ def add_text_to_image(img, text, position, font_path="./ttf/arial.ttf", font_siz
         x = (img.width - text_width) / 2
         position = (x, position[1])
     # Add text to the image
-    draw.text(position, text, font=font, fill="black")  # You can change the fill color if needed
+    draw.text(position, text, font=font, fill=fill)  # You can change the fill color if needed
 
     return img
 
