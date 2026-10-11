@@ -81,12 +81,24 @@ def vcardtemplate_insert_picture(pic_path, template, size=624, position=(228, 21
     pic = Image.open(pic_path).convert("RGBA")
 
     # Resize picture to fit the specified size
-    pic_resized = pic.resize((size, size))
-
-    pic_circular = image_circle_cut(pic_resized, size)
+    pic = pic.resize((size, size))
+    pic = image_circle_cut(pic, size)
 
     # Paste the circular picture onto the template
-    template.paste(pic_circular, position, pic_circular.split()[3])
+    template.paste(pic, position, pic.split()[3])
+
+    return template
+
+def vcardtemplate_insert_logo(pic_path, template, size=False, position=(228, 215)):
+    # Open the picture
+    pic = Image.open(pic_path).convert("RGBA")
+
+    # Resize picture to fit the specified size
+    if(size):
+        pic = pic.resize((size))
+
+    # Paste the circular picture onto the template
+    template.paste(pic, position, pic.split()[3])
 
     return template
 
@@ -156,83 +168,160 @@ def generate_vcardV3(background_path, vcard_info, transparency=0.3):
     return output
 
 def add_text_to_image(img, text, position, font_path="./ttf/arial.ttf", font_size=35, fill="black"):
-    # Create a drawing context
     draw = ImageDraw.Draw(img)
-
-    # Load the font
     font = ImageFont.truetype(font_path, font_size)
-    if(position[0] == False):
-        # Calculate the width of the text to be added
-        text_width = draw.textlength(text, font=font)
 
-        # Calculate X position of the text to be centered horizontally with margin
-        x = (img.width - text_width) / 2
+    # If the text is too long, split it into multiple lines
+    max_width = img.width * 0.8  # You can adjust the maximum width as needed
+    lines = split_text(draw, text, font, max_width)
+
+    # If position[0] is False, center the text horizontally
+    if position[0] == False:
+        max_line_width = max(draw.textlength(line, font=font) for line in lines)
+        x = (img.width - max_line_width) / 2
         position = (x, position[1])
-    # Add text to the image
-    draw.text(position, text, font=font, fill=fill)  # You can change the fill color if needed
+
+    y = position[1]
+    for line in lines:
+        draw.text((position[0], y), line, font=font, fill=fill)
+        y += font_size + 10  # Move to the next line, with a margin between lines
 
     return img
 
+def add_text_to_image_center(img, text, position, font_path="./ttf/arial.ttf", font_size=35, fill="black"):
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype(font_path, font_size)
+
+    # Split the text into lines based on explicit line breaks
+    max_width = img.width * 0.8  # You can adjust the maximum width as needed
+    lines = split_text(draw, text, font, max_width)
+
+    # Calculate the total height of the text block
+    text_height = len(lines) * (font_size + 10)
+
+    # Calculate the vertical position to start drawing the text block
+    if position[1] == False:
+        y = (img.height - text_height) / 2
+    else:
+        y = position[1]
+
+    for line in lines:
+        # Calculate the width of the current line
+        text_width = draw.textlength(line, font=font)
+        # Calculate the horizontal position to center the line
+        x = (img.width - text_width) / 2
+        # Draw the text line
+        draw.text((x, y), line, font=font, fill=fill)
+        # Move to the next line
+        y += font_size + 10
+
+    return img
+
+def split_text_test(draw, text, font, max_width):
+    """
+    Divide el texto en múltiples líneas para que cada línea no exceda el ancho máximo especificado.
+    """
+    lines = []
+    for paragraph in text.split('\n'):
+        words = paragraph.split()
+        current_line = []
+        for word in words:
+            test_line = ' '.join(current_line + [word])
+            text_width = draw.textlength(test_line, font=font)
+            if text_width <= max_width:
+                current_line.append(word)
+            else:
+                lines.append(' '.join(current_line))
+                current_line = [word]
+        lines.append(' '.join(current_line))
+    return lines
+
+def split_text(draw, text, font, max_width):
+    """
+    Divide el texto en múltiples líneas solo cuando se encuentra un salto de línea explícito (\n).
+    """
+    return text.split('\n')
 # Función para revisar el texto entrará en la imagen. No queremos que el nombre salga de la imagen.
 def check_font_size(img, text, margin, initial_font_size=35, font_path="./ttf/arial.ttf"):
     draw = ImageDraw.Draw(img)
     font_size = initial_font_size
     max_width = img.width - 2 * margin  # Apply margin to both sides
+
     while True:
         font = ImageFont.truetype(font_path, font_size)
-        text_width = draw.textlength(text, font=font)
-        if text_width <= max_width:
+        lines = split_text(draw, text, font, max_width)
+        text_width = max(draw.textlength(line, font=font) for line in lines)
+        text_height = len(lines) * (font_size + 10)  # Calculate total height of the text block
+        if text_width <= max_width and text_height <= (img.height - 2 * margin):
             break
-        font_size -= 1  # Decrease font size until the text fits within max_width
+        font_size -= 1  # Decrease font size until the text fits within max_width and height
 
-    return font_size-5
+    return font_size - 5
 
 # nota: perfectamente se puede hacer un string.
 def create_vcard_object(nombre="", apellido="", organizacion="",
                         titulo="", telefono_trabajo="", telefono_personal="",
-                        email="", direccion="", sitio_web="",
+                        emails=None, direccion="", sitio_web="",
                         fecha_nacimiento="", aniversario="",
                         nota=""):
     import vobject
+
+    if emails is None:
+        emails = []
+
     nombre_completo = f"{nombre} {apellido}"
     vcard = vobject.vCard()
+    
     vcard.add('n')
     vcard.n.value = vobject.vcard.Name(family=apellido, given=nombre)
+    
     vcard.add('fn')
     vcard.fn.value = nombre_completo
+    
     if organizacion:
         vcard.add('org')
         vcard.org.value = [organizacion]
+    
     if titulo:
         vcard.add('title')
         vcard.title.value = titulo
+    
     if telefono_trabajo:
         tel_work = vcard.add('tel')
         tel_work.type_param = 'WORK,VOICE'
         tel_work.value = telefono_trabajo
+    
     if telefono_personal:
         tel_home = vcard.add('tel')
         tel_home.type_param = 'HOME,VOICE'
         tel_home.value = telefono_personal
-    if email:
-        vcard.add('email')
-        vcard.email.value = email
+    
+    for email in emails:
+        email_field = vcard.add('email')
+        email_field.type_param = 'INTERNET'
+        email_field.value = email
+    
     if direccion:
         adr = vcard.add('adr')
         adr.type_param = 'WORK'
         adr.value = vobject.vcard.Address(street=direccion)
+    
     if sitio_web:
         url = vcard.add('url')
         url.value = sitio_web
+    
     if fecha_nacimiento:
         bday = vcard.add('bday')
         bday.value = fecha_nacimiento
+    
     if aniversario:
         anniv = vcard.add('anniversary')
         anniv.value = aniversario
+    
     if nota:
         note = vcard.add('note')
         note.value = nota
+
 
     # Generar el string vCard
     return vcard.serialize()

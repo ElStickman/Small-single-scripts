@@ -3,8 +3,9 @@ import params.vcardposinfo as vcardposinfo
 import params.clientslist as clientslist
 
 #Fondo del QR. 
-background_path = 'background/profilepic.png'
-transparency = 0.5 # 0 < transparency <1 
+background_path = 'clientfotos/logoshape.png'
+
+transparency = 0.2 # 0 < transparency <1 
 
 # Lista de parametros a ejecutar
 vcardtypelist = vcardposinfo.vcardslist
@@ -30,7 +31,7 @@ for clientinfo in clients:
         telefono_personal = "ChangeMeNameTitulo"
     email = "Email@falso.cl"
     if clientinfo['email']:
-        email = clientinfo['email']
+        email = clientinfo['email'].split(';')
     else:
         email = "ChangeMeNameTitulo"
     if clientinfo['sitioweb']:
@@ -49,10 +50,13 @@ for clientinfo in clients:
                             email, direccion, sitio_web,
                             fecha_nacimiento, aniversario,
                             nota)
-    profile_pic = f'background/{clientinfo['profilepicname']}.png'
+    if isinstance(email, list):
+        email = email[0]
+    profile_pic = f'clientfotos/{clientinfo['profilepicname']}'
     #Generamos todas las Vcards de la lista.
-
+    
     for vcardtype in vcardtypelist:
+        logo_path = vcardparams[vcardtype[0]]['logo_path']
         #Si no hay sitioweb, omitimos los formatos que tengan "sitioweb"
         if(vcardtype[-1] == "0" and sitio_web == False):
             print(f"Omitiendo formato con sitio web. (No se encontró sitio web) {vcardtype}")
@@ -72,21 +76,28 @@ for clientinfo in clients:
                                         vcard,
                                         size=vcardparams[vcardtype[0]]['profilepixsize'],
                                         position=(vcardparams[vcardtype[0]]['profilepicposX'], vcardparams[vcardtype[0]]['profilepicposY']))
+        if(logo_path):
+            print("Insertando logo")
+            vcard = mainlib.vcardtemplate_insert_logo(logo_path,
+                                            vcard,
+                                            size=(vcardparams[vcardtype[0]]['logosizeX'],vcardparams[vcardtype[0]]['logosizeY']),
+                                            position=(vcardparams[vcardtype[0]]['logoposX'], vcardparams[vcardtype[0]]['logoposY']))        
         print("Agregando texto")
         #El texto de contacto depende del tipo de template.
-        if (vcardtype[-1] == 1):
+        if (vcardtype[-1] == "0" or vcardtype[-1] == "2"):
             #page
             vcard = mainlib.add_text_to_image(vcard, 
                                                 sitio_web, 
                                                 font_path="./ttf/Roboto-Regular.ttf",
-                                                position=(vcardparams[vcardtype[0]]['infoposX'], vcardparams[vcardtype[0]]['pageposY']),
+                                                font_size=vcardparams[vcardtype[0]]['phonefontsize'],
+                                                position=(vcardparams[vcardtype[0]][f'infoposX{vcardtype[-1]}'], vcardparams[vcardtype[0]][f'pageposY{vcardtype[-1]}']),
                                                 fill=vcardparams[vcardtype[0]]['textcolor'])
         #Phone
         vcard = mainlib.add_text_to_image(vcard, 
                                             telefono_personal, 
                                             font_path="./ttf/Roboto-Regular.ttf",
                                             font_size=vcardparams[vcardtype[0]]['phonefontsize'],
-                                            position=(vcardparams[vcardtype[0]]['infoposX'], vcardparams[vcardtype[0]][f'phoneposY{vcardtype[-1]}']),
+                                            position=(vcardparams[vcardtype[0]][f'infoposX{vcardtype[-1]}'], vcardparams[vcardtype[0]][f'phoneposY{vcardtype[-1]}']),
                                             fill=vcardparams[vcardtype[0]]['textcolor'])
         #Email
         if(email) : 
@@ -94,7 +105,7 @@ for clientinfo in clients:
                                                 email, 
                                                 font_path="./ttf/Roboto-Regular.ttf",
                                                 font_size=vcardparams[vcardtype[0]]['emailfontsize'],
-                                                position=(vcardparams[vcardtype[0]]['infoposX'], vcardparams[vcardtype[0]][f'emailposY{vcardtype[-1]}']),
+                                                position=(vcardparams[vcardtype[0]][f'emailposX{vcardtype[-1]}'], vcardparams[vcardtype[0]][f'emailposY{vcardtype[-1]}']),
                                                 fill=vcardparams[vcardtype[0]]['textcolor'])
         #Agregamos nombre.
         name = nombre_completo
@@ -114,13 +125,26 @@ for clientinfo in clients:
         font_size = mainlib.check_font_size(vcard, cargo, margin=20,
                                             font_path="./ttf/Roboto-Regular.ttf",
                                             initial_font_size=90)
-        vcard = mainlib.add_text_to_image(vcard, 
-                                        cargo, 
-                                        font_path="./ttf/Roboto-Regular.ttf",
-                                        position=(False, vcardparams[vcardtype[0]]['tittleposY']),
-                                        font_size=font_size*.8,
-                                        fill=vcardparams[vcardtype[0]]['textcolor'])
-        vcard.save(f'output/{nombre}_{apellido}_Vcard{vcardtype}.png')
+        if '\n' in cargo:
+            vcard = mainlib.add_text_to_image_center(vcard, 
+                                            cargo, 
+                                            font_path="./ttf/Roboto-Regular.ttf",
+                                            position=(False, vcardparams[vcardtype[0]]['tittleposY']),
+                                            font_size=font_size*.8,
+                                            fill=vcardparams[vcardtype[0]]['textcolor'])
+
+        else:            
+            vcard = mainlib.add_text_to_image(vcard, 
+                                            cargo, 
+                                            font_path="./ttf/Roboto-Regular.ttf",
+                                            position=(False, vcardparams[vcardtype[0]]['tittleposY']),
+                                            font_size=font_size*.8,
+                                            fill=vcardparams[vcardtype[0]]['textcolor'])
+        if 'alt' in clientinfo:
+            alt = "ALT_"
+        else:
+            alt = ""          
+        vcard.save(f'output/{alt}{nombre}_{apellido}_Vcard{vcardtype}.png')
 
 print("Eliminando Caché")
 mainlib.delete_pycache()
